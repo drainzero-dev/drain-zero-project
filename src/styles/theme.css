@@ -1,0 +1,17 @@
+/* Drain Zero Design Tokens */
+:root {
+    --color-background: #F2F3F4;
+    /* Anti Flash White */
+    --color-primary: #5B92E5;
+    /* United Nations Blue */
+    --color-accent: #08457E;
+    /* Dark Cerulean */
+    --color-surface: #FFFFFF;
+    --color-text-title: #08457E;
+    /* Dark Cerulean */
+    --color-text-body: #4B5563;
+
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.04);
+    --border-radius-lg: 24px;
+    --border-radius-md: 12px;
+}
