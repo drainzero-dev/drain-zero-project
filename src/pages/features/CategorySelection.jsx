@@ -52,9 +52,9 @@ const CATEGORIES = [
 
 const SUBCATEGORIES = {
     'Vehicle': ['Car', 'Bike', 'Scooter'],
-    'Stocks': ['Equity Shares', 'Mutual Funds', 'F&O Trading', 'Crypto', 'Dividends', 'Bonds'],
+    'Stocks': ['Equity Shares', 'Mutual Funds', 'F&O Trading', 'Bonds / Debentures', 'Crypto'],
     'Health Insurance': ['Self', 'Family', 'Parents', 'Senior Parents'],
-    'Land': ['Residential', 'Commercial', 'Agricultural', 'Plot', 'Let-Out', 'Sold Property']
+    'Land': ['Residential', 'Commercial', 'Agricultural Land', 'Plot / Vacant Land']
 };
 
 const OWNERSHIP_TYPES = ['First-hand', 'Second-hand'];

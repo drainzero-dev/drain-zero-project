@@ -79,32 +79,21 @@ const LoginPage = () => {
                         </Text>
                     </div>
 
-                    <Form layout="vertical" size="large">
-                        <Form.Item name="username" label={<Text strong style={{ color: '#084C8D' }}>Email / Username</Text>}>
-                            <Input placeholder="Enter your email or username" />
-                        </Form.Item>
-                        <Form.Item name="password" label={<Text strong style={{ color: '#084C8D' }}>Password</Text>}>
-                            <Input.Password placeholder="Enter your password" />
-                        </Form.Item>
-
-                        <div style={{ textAlign: 'right', marginBottom: 24 }}>
-                            <Link to="#" style={{ color: '#5B92E5', fontWeight: 500 }}>
-                                Forgot password?
-                            </Link>
-                        </div>
-
-                        <Form.Item>
-                            <Button type="primary" block size="large" onClick={() => navigate('/category-selection')}>
-                                Sign In →
-                            </Button>
-                        </Form.Item>
-
-                        <Divider plain style={{ color: '#6B7280', margin: '24px 0' }}>or</Divider>
-
-                        <Button block size="large" icon={<GoogleOutlined />} style={{
-                            borderColor: '#B8C8E6',
-                            color: '#1F2937'
-                        }}>
+                    <div style={{ marginTop: 24 }}>
+                        <Button
+                            block
+                            size="large"
+                            icon={<GoogleOutlined />}
+                            style={{
+                                borderColor: '#B8C8E6',
+                                color: '#1F2937'
+                            }}
+                            onClick={() => {
+                                // Simulate Google Auth
+                                window.confirm('Sign in with Google?');
+                                navigate('/category-selection');
+                            }}
+                        >
                             Continue with Google
                         </Button>
 
@@ -113,7 +102,7 @@ const LoginPage = () => {
                                 New here? <Link to="/signup" style={{ color: '#5B92E5', fontWeight: 600 }}>Create account</Link>
                             </Text>
                         </div>
-                    </Form>
+                    </div>
                 </Card>
             </Layout>
         </ConfigProvider>

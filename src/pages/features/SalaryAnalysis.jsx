@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Typography, Card, Row, Col, Space, Button, Table, Statistic, Tooltip, ConfigProvider } from 'antd';
 import { ArrowLeftOutlined, SolutionOutlined, InfoCircleOutlined, CheckCircleFilled } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import TaxAssistantChatbot from '../../components/TaxAssistantChatbot';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -9,6 +10,19 @@ const { Title, Text, Paragraph } = Typography;
 const SalaryAnalysis = () => {
     const location = useLocation();
     const navigate = useNavigate();
+
+    if (!location.state) {
+        return (
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+                <Title level={2}>Salary Structure Analysis</Title>
+                <div style={{ padding: '60px', background: '#fff', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                    <p>Salary optimization requires your current income breakdown. Please complete the form.</p>
+                    <Button type="primary" onClick={() => navigate('/category-selection')}>Analyze Salary</Button>
+                </div>
+            </div>
+        );
+    }
+
     const { formData, category, subcategory } = location.state || {};
 
     const baseSalary = formData?.annualSalary || 1500000;
@@ -112,6 +126,10 @@ const SalaryAnalysis = () => {
 
                     <div style={{ marginTop: '40px', textAlign: 'center' }}>
                         <Text type="secondary" style={{ fontSize: '13px' }}>Note: Suggested structure may require discussion with your Employer HR / Payroll team.</Text>
+                    </div>
+
+                    <div style={{ marginTop: '40px' }}>
+                        <TaxAssistantChatbot />
                     </div>
                 </Content>
             </Layout>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Typography, Card, Space, Button, Statistic, Progress, Row, Col, List, Tag, ConfigProvider } from 'antd';
 import { ArrowLeftOutlined, SafetyCertificateFilled, CheckCircleFilled, WarningOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import TaxAssistantChatbot from '../../components/TaxAssistantChatbot';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -9,9 +10,22 @@ const { Title, Text, Paragraph } = Typography;
 const TaxHealth = () => {
     const location = useLocation();
     const navigate = useNavigate();
+
+    if (!location.state) {
+        return (
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+                <Title level={2}>Tax Health Score</Title>
+                <div style={{ padding: '60px', background: '#fff', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                    <p>Financial health score calculation requires input data. Please complete the optimization form.</p>
+                    <Button type="primary" onClick={() => navigate('/category-selection')}>Get Scored</Button>
+                </div>
+            </div>
+        );
+    }
+
     const { category, subcategory, formData } = location.state || {};
 
-    // Logic for Score calculation (Simplified)
+    // Logic: Comprehensive Score calculation
     let score = 100;
     let factors = [];
 
@@ -19,42 +33,54 @@ const TaxHealth = () => {
     const d80C = formData?.deduction80C || 0;
     if (d80C < 150000) {
         score -= 15;
-        factors.push({ status: 'warning', title: '80C Utilization', description: 'Underutilized investment limits (₹1.5L cap).' });
+        factors.push({ status: 'warning', title: 'Sec 80C Utilization', description: `₹${(150000 - d80C).toLocaleString()} gap in basic 1.5L limit.` });
     } else {
-        factors.push({ status: 'success', title: '80C Utilization', description: 'Maxed out section 80C deductions.' });
+        factors.push({ status: 'success', title: 'Sec 80C Analysis', description: 'Fully utilized the 1.5L statutory limit.' });
     }
 
-    // Factor 2: 80D Usage
-    const d80D = formData?.deduction80D || 0;
-    if (d80D < 15000) {
+    // Factor 2: NPS Extra Benefit (80CCD 1B)
+    const dNPS = formData?.deductionNPS || 0;
+    if (dNPS < 50000) {
         score -= 10;
-        factors.push({ status: 'warning', title: '80D Health Cover', description: 'Limited health insurance deduction claimed.' });
+        factors.push({ status: 'warning', title: 'NPS Top-up', description: 'Missing additional ₹50k deduction for retirement.' });
     } else {
-        factors.push({ status: 'success', title: '80D Health Cover', description: 'Efficient insurance deductions.' });
+        factors.push({ status: 'success', title: 'NPS Performance', description: 'Retirement tax benefit maximized.' });
     }
 
-    // Factor 3: Vehicle Optimization (if applicable)
+    // Factor 3: 80D Health Insurance
+    const premium = formData?.premiumAmount || 0;
+    const isSenior = formData?.hasSeniorCitizen === 'yes' || formData?.coverageType === 'Senior Parents';
+    const limit80D = isSenior ? 50000 : 25000;
+    if (premium < limit80D * 0.5) {
+        score -= 10;
+        factors.push({ status: 'warning', title: 'Health Shield', description: 'Low health coverage vs potential tax benefits.' });
+    } else {
+        factors.push({ status: 'success', title: 'Health Shield', description: 'Optimal health cover for self/family.' });
+    }
+
+    // Factor 4: Asset Specific (Vehicle/Property/Stocks)
     if (category === 'Vehicle') {
-        if (!formData?.fuelReimbursement || !formData?.maintenanceReimbursement) {
-            score -= 15;
-            factors.push({ status: 'warning', title: 'Vehicle Reimbursements', description: 'Missing fuel/maintenance reimbursements.' });
-        } else {
-            factors.push({ status: 'success', title: 'Vehicle Reimbursements', description: 'Appropriate expense claims detected.' });
-        }
-
-        if (formData?.usageType === 'Business' && !formData?.interestRate) {
+        if (formData.employmentType === 'Salaried' && formData.isEmployerProvided === 'yes') {
+            factors.push({ status: 'success', title: 'Employer Perquisites', description: 'Efficiency gained through employer-provided car.' });
+        } else if (formData.usageType === 'Personal' && formData.purchasePrice > 1000000) {
             score -= 10;
-            factors.push({ status: 'warning', title: 'Asset Financing', description: 'No loan interest shield despite business usage.' });
+            factors.push({ status: 'warning', title: 'Vehicle Efficiency', description: 'High personal spend with no tax shield. Consider business lease.' });
         }
     }
 
-    // Regime Logic (simplified)
-    const regime = formData?.regimePreference || 'Auto Suggest';
-    if (regime === 'Auto Suggest') {
-        factors.push({ status: 'success', title: 'Regime Efficiency', description: 'Engine-led regime selection active.' });
-    } else {
-        score -= 5;
-        factors.push({ status: 'warning', title: 'Regime Logic', description: 'Manual selection may not be the cheapest option.' });
+    if (category === 'Stocks' || category === 'Investments') {
+        if (formData.hasCapitalLoss === 'yes' && formData.lossCarryForward > 0) {
+            factors.push({ status: 'success', title: 'Loss Harvesting', description: 'Tax liability reduced using previous losses.' });
+        } else if (formData.assetType === 'Crypto') {
+            score -= 15;
+            factors.push({ status: 'warning', title: 'Asset Quality', description: 'Crypto is taxed aggressively (30% flat) with no loss set-off.' });
+        }
+    }
+
+    // Factor 5: Regime Logic
+    const regime = formData?.regimePreference || 'Auto';
+    if (regime === 'New Regime' && (salary + otherIncome) > 1500000) {
+         factors.push({ status: 'success', title: 'Regime Fit', description: 'New regime is generally optimal for high earners post standard dev hike.' });
     }
 
     const scoreFinal = Math.max(20, score);
@@ -150,10 +176,17 @@ const TaxHealth = () => {
                                 {category === 'Vehicle' && (
                                     <li>Restructure your {subcategory} ownership to business usage if eligible, claiming 15% annual depreciation.</li>
                                 )}
+                                {category === 'Health Insurance' && (
+                                    <>
+                                        <li>Maximize Parents' 80D limit (₹50k if seniors) by paying their premiums from your taxable income.</li>
+                                        <li>Always claim the ₹5,000 preventive health checkup - no separate receipts needed if paid digitally.</li>
+                                    </>
+                                )}
                                 <li>Ensure medical premium receipts cover both health checkups and primary insurance.</li>
                             </ul>
                         </Paragraph>
                     </Card>
+                    <TaxAssistantChatbot />
                 </Content>
             </Layout>
         </ConfigProvider>

@@ -80,9 +80,7 @@ const SignupPage = () => {
                     </div>
 
                     <Form layout="vertical" size="large">
-                        <Form.Item name="fullname" label={<Text strong style={{ color: '#084C8D' }}>Full Name</Text>}>
-                            <Input placeholder="Enter your full name" />
-                        </Form.Item>
+
 
                         <Form.Item name="email" label={<Text strong style={{ color: '#084C8D' }}>Email</Text>}>
                             <Input placeholder="Enter your email" />
@@ -92,9 +90,7 @@ const SignupPage = () => {
                             <Input.Password placeholder="Create a password" />
                         </Form.Item>
 
-                        <Form.Item name="confirmPassword" label={<Text strong style={{ color: '#084C8D' }}>Confirm Password</Text>}>
-                            <Input.Password placeholder="Confirm your password" />
-                        </Form.Item>
+
 
                         <Form.Item style={{ marginTop: 8 }}>
                             <Button type="primary" block size="large" onClick={() => navigate('/category-selection')}>

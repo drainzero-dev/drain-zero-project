@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Typography, Card, Row, Col, Space, Button, Badge, Tag, ConfigProvider } from 'antd';
 import { ArrowLeftOutlined, RocketOutlined, CheckCircleOutlined, SwapOutlined, CarOutlined } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import TaxAssistantChatbot from '../../components/TaxAssistantChatbot';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -9,6 +10,19 @@ const { Title, Text, Paragraph } = Typography;
 const Recommendations = () => {
     const location = useLocation();
     const navigate = useNavigate();
+
+    if (!location.state) {
+        return (
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+                <Title level={2}>Actionable Recommendations</Title>
+                <div style={{ padding: '60px', background: '#fff', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                    <p>Recommendations are generated based on your profile. Please provide your data first.</p>
+                    <Button type="primary" onClick={() => navigate('/category-selection')}>Generate Recommendations</Button>
+                </div>
+            </div>
+        );
+    }
+
     const { category, subcategory, ownership, formData } = location.state || {};
 
     const recommendations = [];
@@ -27,43 +41,114 @@ const Recommendations = () => {
         });
     }
 
-    // Recommendation 2: Vehicle Depreciation
-    if (category === 'Vehicle' && formData?.usageType !== 'Business') {
+    // Recommendation: NPS Optimization
+    const currentNPS = formData?.deductionNPS || 0;
+    if (currentNPS < 50000) {
         recommendations.push({
-            id: 2,
-            title: 'Conver to Business Asset',
-            description: `If you use your ${subcategory} for official work, claiming it as a business asset allows for 15% depreciation shield.`,
-            icon: <CarOutlined />,
-            iconColor: '#10B981',
-            savings: '₹35,000+',
-            tag: 'Optimization'
-        });
-    }
-
-    // Recommendation 3: Second-Hand Resale (Specific)
-    if (category === 'Vehicle' && ownership === 'Second-hand') {
-        recommendations.push({
-            id: 3,
-            title: 'Plan Resale Timing',
-            description: `Second-hand ${subcategory} values drop faster. Plan to resell after 3 years for maximum market efficiency.`,
+            id: 7,
+            title: 'Maximize NPS (80CCD 1B)',
+            description: 'Invest an additional ₹50,000 in Tier-1 NPS to get exclusive deduction beyond the ₹1.5L Sec 80C limit.',
             icon: <RocketOutlined />,
-            iconColor: '#F59E0B',
-            savings: '₹45,000+',
-            tag: 'Resale'
+            iconColor: '#8B5CF6',
+            savings: '₹15,600',
+            tag: 'Retirement'
         });
     }
 
-    // Recommendation 4: Reimbursements
-    if (!formData?.fuelReimbursement) {
+    // Recommendation: Stock Gain Harvesting
+    if (category === 'Stocks' || category === 'Investments') {
         recommendations.push({
-            id: 4,
-            title: 'Claim Fuel & Maintenance',
-            description: `Submit actual bills to claim tax-free reimbursements for your ${subcategory}.`,
-            icon: <CheckCircleOutlined />,
-            iconColor: '#8B5CF6',
-            savings: '₹8,000+',
-            tag: 'Salary'
+            id: 8,
+            title: 'Harvest ₹1.25L Tax-Free Gain',
+            description: 'Equity LTCG is tax-free up to ₹1.25 Lakh. Consider selling and reinvesting to reset your purchase price tax-efficiently.',
+            icon: <SwapOutlined />,
+            iconColor: '#10B981',
+            savings: '₹15,625',
+            tag: 'LTCG Rule'
         });
+
+        if (formData.hasCapitalLoss === 'yes') {
+             recommendations.push({
+                id: 9,
+                title: 'Offset Capital Gains',
+                description: 'Use your previous losses to offset current year gains. Ensure you file ITR before deadline to carry forward losses.',
+                icon: <CheckCircleOutlined />,
+                iconColor: '#F59E0B',
+                savings: 'Variable',
+                tag: 'Loss Offset'
+            });
+        }
+    }
+
+    // Recommendation 2: Vehicle Depreciation & EV
+    if (category === 'Vehicle') {
+        if (formData.usageType !== 'Business' && formData.employmentType === 'Self-Employed') {
+            recommendations.push({
+                id: 2,
+                title: 'Convert to Business Asset',
+                description: `Claiming your ${subcategory} as a business asset allows for 15% depreciation shield for cars (30% for bikes).`,
+                icon: <CarOutlined />,
+                iconColor: '#10B981',
+                savings: '₹35,000+',
+                tag: 'Optimization'
+            });
+        }
+        
+        if (formData.fuelType === 'Electric' && !formData.loanInterestPaid) {
+            recommendations.push({
+                id: 10,
+                title: 'Leverage 80EEB EV Loan',
+                description: 'EV loans offer ₹1.5L interest deduction. Even if you have cash, a small loan can shield higher income from tax.',
+                icon: <RocketOutlined />,
+                iconColor: '#5B92E5',
+                savings: '₹46,800',
+                tag: 'EV Benefit'
+            });
+        }
+    }
+
+    // Recommendation 5: Health Insurance Optimization
+    if (category === 'Health Insurance' || formData.premiumAmount > 0) {
+        const isSenior = formData?.hasSeniorCitizen === 'yes' || formData?.coverageType === 'Senior Parents';
+        const limit80D = isSenior ? 50000 : 25000;
+        const premium = formData?.premiumAmount || 0;
+
+        if (premium < limit80D) {
+            recommendations.push({
+                id: 5,
+                title: 'Optimize Health Cover',
+                description: `Increase your coverage or add parents to utilize the full Sec 80D limit of ₹${limit80D.toLocaleString()}.`,
+                icon: <RocketOutlined />,
+                iconColor: '#10B981',
+                savings: '₹7,500+',
+                tag: 'Protection'
+            });
+        }
+
+        recommendations.push({
+            id: 6,
+            title: 'Claim Preventive Health Checkup',
+            description: 'Claim up to ₹5,000/year for health checkups. This is within the 80D limit and often missed by taxpayers.',
+            icon: <CheckCircleOutlined />,
+            iconColor: '#5B92E5',
+            savings: '₹1,560',
+            tag: 'Health'
+        });
+    }
+
+    // Recommendation 11: Property Optimization
+    if (category === 'Land' || category === 'Property') {
+        if (formData.propertyOwnershipType === 'Self-occupied' && !formData.loanInterestPaid) {
+            recommendations.push({
+                id: 11,
+                title: 'Home Loan Interest Shield',
+                description: 'Self-occupied property interest up to ₹2 Lakh is deductible. Consider taking a loan for renovations if needed.',
+                icon: <SwapOutlined />,
+                iconColor: '#8B5CF6',
+                savings: '₹62,400',
+                tag: 'Sec 24b'
+            });
+        }
     }
 
     const recCardStyle = {
@@ -148,6 +233,10 @@ const Recommendations = () => {
                             <Title level={4} style={{ color: '#08457E', marginBottom: '12px' }}>Expert Review Available</Title>
                             <Paragraph style={{ color: '#4B5563' }}>Get these recommendations vetted by a chartered accountant for personalized advice. Coming soon.</Paragraph>
                         </div>
+                    </div>
+
+                    <div style={{ marginTop: '40px' }}>
+                        <TaxAssistantChatbot />
                     </div>
                 </Content>
             </Layout>

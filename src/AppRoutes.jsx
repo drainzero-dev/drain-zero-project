@@ -6,6 +6,12 @@ import SignupPage from './pages/Auth/SignupPage';
 import AnalysisForm from './pages/AnalysisForm';
 import Dashboard from './pages/Dashboard';
 
+// Module Pages
+import VehiclePage from './pages/modules/VehiclePage';
+import StocksPage from './pages/modules/StocksPage';
+import HealthInsurancePage from './pages/modules/HealthInsurancePage';
+import LandPage from './pages/modules/LandPage';
+
 // Feature Detail Pages
 import RegimeComparison from './pages/features/RegimeComparison';
 import TaxLeakage from './pages/features/TaxLeakage';
@@ -24,6 +30,12 @@ const AppRoutes = () => {
             <Route path="/analysis" element={<AnalysisForm />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/category-selection" element={<CategorySelection />} />
+
+            {/* Module Routes */}
+            <Route path="/vehicle" element={<VehiclePage />} />
+            <Route path="/stocks" element={<StocksPage />} />
+            <Route path="/health-insurance" element={<HealthInsurancePage />} />
+            <Route path="/land" element={<LandPage />} />
 
             {/* Feature Detail Routes */}
             <Route path="/feature/regime-comparison" element={<RegimeComparison />} />

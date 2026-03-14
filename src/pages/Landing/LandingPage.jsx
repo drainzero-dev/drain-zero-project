@@ -39,33 +39,6 @@ const features = [
     }
 ];
 
-const processSteps = [
-    {
-        step: "01",
-        title: "Select Category",
-        description: "Vehicle, Stocks, Health Insurance, Land",
-    },
-    {
-        step: "02",
-        title: "Select Subcategory and Ownership",
-        description: "Car → First-hand / Second-hand",
-    },
-    {
-        step: "03",
-        title: "Enter Financial Inputs",
-        description: "Enter your financial data for calculation.",
-    },
-    {
-        step: "04",
-        title: "Analyze and View Dashboard",
-        description: "Review your optimized tax results.",
-    },
-    {
-        step: "05",
-        title: "Download Analysis Report",
-        description: "Get your detailed PDF report.",
-    }
-];
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -225,101 +198,11 @@ const LandingPage = () => {
                         </Row>
                     </div>
                 </section>
-
-                {/* Process Section */}
-                <section style={{
-                    padding: '120px 24px',
-                    backgroundColor: '#F2F3F4'
-                }}>
-                    <div style={{ maxWidth: 1250, margin: '0 auto' }}>
-                        <Title level={2} style={{
-                            textAlign: 'center',
-                            color: '#08457E',
-                            marginBottom: 80,
-                            fontSize: '2.5rem',
-                            fontWeight: 700
-                        }}>
-                            Optimization Process
-                        </Title>
-                        <div className="process-grid" style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(5, 1fr)',
-                            gap: '24px'
-                        }}>
-                            {processSteps.map((step, index) => (
-                                <Card
-                                    key={index}
-                                    bordered={false}
-                                    style={{
-                                        borderRadius: 24,
-                                        backgroundColor: '#FFFFFF',
-                                        boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-                                        textAlign: 'center',
-                                        position: 'relative',
-                                        paddingTop: 40
-                                    }}
-                                    bodyStyle={{ padding: '24px 20px 32px' }}
-                                >
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: -24,
-                                        left: '50%',
-                                        transform: 'translateX(-50%)',
-                                        width: 48,
-                                        height: 48,
-                                        backgroundColor: '#08457E',
-                                        color: '#FFFFFF',
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontWeight: 800,
-                                        fontSize: 20,
-                                        boxShadow: '0 8px 16px rgba(8, 69, 126, 0.15)'
-                                    }}>
-                                        {step.step}
-                                    </div>
-                                    <Title level={4} style={{
-                                        color: '#08457E',
-                                        fontSize: '1.15rem',
-                                        marginBottom: 16,
-                                        lineHeight: 1.4,
-                                        fontWeight: 700
-                                    }}>
-                                        {step.title}
-                                    </Title>
-                                    <Text style={{
-                                        color: '#6B7280',
-                                        fontSize: '1rem',
-                                        lineHeight: 1.5
-                                    }}>
-                                        {step.description}
-                                    </Text>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                </section>
-
                 <style>
                     {`
                         .feature-card:hover {
                             transform: translateY(-5px);
                             box-shadow: 0 15px 35px rgba(8, 69, 126, 0.08);
-                        }
-                        
-                        @media (max-width: 1200px) {
-                            .process-grid {
-                                grid-template-columns: repeat(3, 1fr) !important;
-                                gap: 32px 24px;
-                            }
-                        }
-                        
-                        @media (max-width: 768px) {
-                            .process-grid {
-                                grid-template-columns: 1fr !important;
-                                gap: 48px;
-                            }
                         }
                     `}
                 </style>

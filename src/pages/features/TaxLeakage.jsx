@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout, Typography, Card, Row, Col, Space, Button, List, Tag, Statistic, ConfigProvider } from 'antd';
 import { ArrowLeftOutlined, WarningOutlined, InfoCircleFilled } from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
+import TaxAssistantChatbot from '../../components/TaxAssistantChatbot';
 
 const { Content } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -9,58 +10,153 @@ const { Title, Text, Paragraph } = Typography;
 const TaxLeakage = () => {
     const location = useLocation();
     const navigate = useNavigate();
+
+    if (!location.state) {
+        return (
+            <div style={{ padding: '40px', textAlign: 'center' }}>
+                <Title level={2}>Tax Leakage Detection</Title>
+                <div style={{ padding: '60px', background: '#fff', borderRadius: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+                    <p>Analysis data not available. Please enter your details first.</p>
+                    <Button type="primary" onClick={() => navigate('/category-selection')}>Begin Analysis</Button>
+                </div>
+            </div>
+        );
+    }
+
     const { category, subcategory, ownership, formData } = location.state || {};
 
     // Logic: Identify potential missed deductions
+    // Logic: Identify potential missed deductions
     const missed80C = Math.max(0, 150000 - (formData?.deduction80C || 0));
-    const missed80D = Math.max(0, 25000 - (formData?.deduction80D || 0));
     const slabRate = (formData?.annualSalary || 0) > 1500000 ? 0.30 : 0.20;
 
     let leakageItems = [];
     let totalLeakage = 0;
 
-    if (missed80C > 0) {
+    // 1. 80C Leakage
+    if (missed80C > 1000) {
         const potentialSave = missed80C * slabRate;
         leakageItems.push({
             title: 'Unused 80C Limit',
-            description: `You have ₹${missed80C.toLocaleString()} left in your Section 80C limit (LIC, PPF, etc).`,
+            description: `You have ₹${missed80C.toLocaleString()} left in your Section 80C limit (LIC, PPF, ELSS, etc).`,
             potential: potentialSave,
             tag: 'Investment'
         });
         totalLeakage += potentialSave;
     }
 
-    if (missed80D > 0) {
-        const potentialSave = missed80D * slabRate;
+    // 2. NPS Leakage (80CCD 1B - extra 50k)
+    const currentNPS = formData?.deductionNPS || 0;
+    const missedNPS = Math.max(0, 50000 - currentNPS);
+    if (missedNPS > 1000) {
+        const potentialSave = missedNPS * slabRate;
         leakageItems.push({
-            title: 'Health Insurance Gap',
-            description: `You haven't fully utilized Section 80D for self or family.`,
+            title: 'NPS Extra Benefit (80CCD 1B)',
+            description: `You are missing out on the additional ₹50,000 deduction available only for NPS contributions.`,
             potential: potentialSave,
-            tag: 'Insurance'
+            tag: 'Retirement'
         });
         totalLeakage += potentialSave;
     }
 
+    // 3. 80D Leakage
+    const currentClaimed80D = formData?.deduction80D || 0;
+    const premiumAmount = formData?.premiumAmount || 0;
+    const coverageType = formData?.coverageType || '';
+    const limit80D = (formData?.hasSeniorCitizen === 'yes' || coverageType === 'Senior Parents') ? 50000 : 25000;
+    const potential80DValue = Math.min(premiumAmount + (formData?.preventiveCheckup || 0), limit80D);
+    const missed80D = Math.max(0, potential80DValue - currentClaimed80D);
+
+    if (missed80D > 1000) {
+        const potentialSave = missed80D * slabRate;
+        leakageItems.push({
+            title: 'Health Insurance (80D) Leakage',
+            description: `Claiming ₹${missed80D.toLocaleString()} more in Section 80D (Health Premiums + Preventive Checkups) can reduce tax.`,
+            potential: potentialSave,
+            tag: 'Health'
+        });
+        totalLeakage += potentialSave;
+    }
+
+    // 4. Vehicle Module Leakage
     if (category === 'Vehicle') {
-        if (!formData?.fuelReimbursement || formData.fuelReimbursement === 0) {
-            const potentialSave = 40000 * slabRate; // Assume average fuel reimbursement potential
+        // EV Benefit
+        if (formData.fuelType === 'Electric' && !formData.loanInterestPaid) {
             leakageItems.push({
-                title: 'Fuel Reimbursement Not Claimed',
-                description: `Claiming fuel as a business reimbursement instead of salary can save tax.`,
-                potential: potentialSave,
-                tag: 'Reimbursement'
+                title: 'EV 80EEB Benefit Missed',
+                description: `Electric vehicles qualify for ₹1.5L interest deduction. You are using personal capital instead of tax-efficient debt.`,
+                potential: 150000 * slabRate,
+                tag: 'EV Benefit'
             });
-            totalLeakage += potentialSave;
+            totalLeakage += 150000 * slabRate;
         }
 
-        if (ownership === 'First-hand' && (!formData?.interestRate || formData.interestRate === 0)) {
+        // Business Usage Depreciation
+        if (formData.usageType === 'Business' && formData.employmentType === 'Self-Employed' && (formData.businessUsagePercentage || 100) < 100) {
             leakageItems.push({
-                title: 'No Loan Interest Benefit',
-                description: `For new vehicles, taking a loan can provide significant interest deductions in Old Regime.`,
+                title: 'Under-utilized Business Depreciation',
+                description: `You have logged less than 100% business usage. Increasing this to actual usage can shield more income via depreciation.`,
                 potential: 15000,
-                tag: 'Loan'
+                tag: 'Business'
             });
             totalLeakage += 15000;
+        }
+
+        // Salary Optimization (Salaried)
+        if (formData.employmentType === 'Salaried' && !formData.fuelReimbursement) {
+            leakageItems.push({
+                title: 'Salary Structure Not Optimized',
+                description: `Fuel, Maintenance and Driver salary reimbursements are tax-free. Your current structure taxes these as pure salary.`,
+                potential: 36000,
+                tag: 'Salary Struct'
+            });
+            totalLeakage += 36000;
+        }
+    }
+
+    // 5. Stocks & F&O Leakage
+    if (category === 'Stocks' || category === 'Investments') {
+        if (formData.assetType === 'F&O Trading' && formData.numTrades > 50 && !formData.brokerage) {
+            leakageItems.push({
+                title: 'Missing F&O Business Expenses',
+                description: `F&O is a business. You haven't claimed brokerage, internet, or advisory costs which could reduce taxable profit.`,
+                potential: 10000,
+                tag: 'Business'
+            });
+            totalLeakage += 10000;
+        }
+        
+        if (formData.hasCapitalLoss === 'yes' && !formData.lossCarryForward) {
+             leakageItems.push({
+                title: 'Unclaimed Loss Carry Forward',
+                description: `Previous capital losses can offset current gains. You haven't utilized your 8-year carry forward window.`,
+                potential: 5000,
+                tag: 'Capital Gains'
+            });
+            totalLeakage += 5000;
+        }
+    }
+
+    // 6. Property Leakage
+    if (category === 'Land' || category === 'Property') {
+        if (formData.propertyOwnershipType === 'Self-occupied' && !formData.loanInterestPaid) {
+            leakageItems.push({
+                title: 'Missing Home Loan Interest (24b)',
+                description: `You are missing out on up to ₹2,00,000 deduction on home loan interest for self-occupied property.`,
+                potential: 200000 * slabRate,
+                tag: 'Property'
+            });
+            totalLeakage += 200000 * slabRate;
+        }
+
+        if (formData.propertyOwnershipType === 'Let-out' && !formData.municipalTaxes) {
+            leakageItems.push({
+                title: 'Missing Municipal Tax Deduction',
+                description: `Municipal taxes are deductible from rental income before applying the 30% standard deduction.`,
+                potential: 3000,
+                tag: 'Rental'
+            });
+            totalLeakage += 3000;
         }
     }
 
@@ -152,6 +248,10 @@ const TaxLeakage = () => {
                             </Button>
                         </div>
                     </Card>
+
+                    <div style={{ marginTop: '40px' }}>
+                        <TaxAssistantChatbot />
+                    </div>
 
                     <style>
                         {`
